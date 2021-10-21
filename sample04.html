@@ -990,6 +990,85 @@ function init(){
         return normalizeActions(actions);
     }
 
+    function yellowCrossActions() {
+        let futureFaces = copyFaces(faces2);
+        const actions = [];
+        const speed = 1;
+        function pushAction(axis, direction) {
+            const action = {axis, direction, speed};
+            actions.push(action);
+            rotateFaces(action, futureFaces);
+        }
+        if (!isSolved(middleEdgeActions(colorB, colorR))) {
+            return null;
+        }
+        if (!isSolved(middleEdgeActions(colorR, colorG))) {
+            return null;
+        }
+        if (!isSolved(middleEdgeActions(colorG, colorO))) {
+            return null;
+        }
+        if (!isSolved(middleEdgeActions(colorO, colorB))) {
+            return null;
+        }
+        for (let i = 0; i < 100; i++) {
+            if (futureFaces[1].color == colorY && futureFaces[3].color == colorY && futureFaces[5].color == colorY && futureFaces[7].color == colorY) {
+                break;
+            }
+            if (futureFaces[3].color == colorY && futureFaces[5].color == colorY) {
+                pushAction("z", [ 0,  0, +1]);
+                pushAction("x", [ 0,  0, +1]);
+                pushAction("y", [ 0,  0, +1]);
+                pushAction("x", [ 0,  0, -1]);
+                pushAction("y", [ 0,  0, -1]);
+                pushAction("z", [ 0,  0, -1]);
+                continue;
+            }
+            if (futureFaces[1].color == colorY && futureFaces[7].color == colorY) {
+                pushAction("y", [+1, +1, +1]);
+                continue;
+            }
+
+            if (futureFaces[1].color == colorY && futureFaces[3].color == colorY) {
+                pushAction("z", [ 0,  0, +1]);
+                pushAction("x", [ 0,  0, +1]);
+                pushAction("y", [ 0,  0, +1]);
+                pushAction("x", [ 0,  0, -1]);
+                pushAction("y", [ 0,  0, -1]);
+                pushAction("x", [ 0,  0, +1]);
+                pushAction("y", [ 0,  0, +1]);
+                pushAction("x", [ 0,  0, -1]);
+                pushAction("y", [ 0,  0, -1]);
+                pushAction("z", [ 0,  0, -1]);
+                continue;
+            }
+            if (futureFaces[3].color == colorY && futureFaces[7].color == colorY) {
+                pushAction("y", [+1, +1, +1]);
+                continue;
+            }
+            if (futureFaces[5].color == colorY && futureFaces[7].color == colorY) {
+                pushAction("y", [+1, +1, +1]);
+                continue;
+            }
+            if (futureFaces[1].color == colorY && futureFaces[5].color == colorY) {
+                pushAction("y", [-1, -1, -1]);
+                continue;
+            }
+            if (true) {
+                pushAction("z", [ 0,  0, +1]);
+                pushAction("x", [ 0,  0, +1]);
+                pushAction("y", [ 0,  0, +1]);
+                pushAction("x", [ 0,  0, -1]);
+                pushAction("y", [ 0,  0, -1]);
+                pushAction("z", [ 0,  0, -1]);
+                continue;
+            }
+
+            return null;
+        }
+        return normalizeActions(actions);
+    }
+
     setActionBtnClickEvent("action-yellow-to-top", "", function() {
         return yellowToTopActions();
     });
@@ -999,7 +1078,6 @@ function init(){
             return whiteEdgeActions(edgeColor);
         });
     }
-
     whiteEdgeHandler("action-white-blue",   colorB);
     whiteEdgeHandler("action-white-red",    colorR);
     whiteEdgeHandler("action-white-green",  colorG);
@@ -1010,7 +1088,6 @@ function init(){
             return whiteCornerActions(edgeColor1, edgeColor2);
         });
     }
-
     whiteCornerHandler("action-white-blue-red",     colorB, colorR);
     whiteCornerHandler("action-white-red-green",    colorR, colorG);
     whiteCornerHandler("action-white-green-orange", colorG, colorO);
@@ -1021,11 +1098,14 @@ function init(){
             return middleEdgeActions(edgeColor1, edgeColor2);
         });
     }
-
     middleEdgeHandler("action-blue-red",     colorB, colorR);
     middleEdgeHandler("action-red-green",    colorR, colorG);
     middleEdgeHandler("action-green-orange", colorG, colorO);
     middleEdgeHandler("action-orange-blue",  colorO, colorB);
+
+    setActionBtnClickEvent("action-yellow-cross", "", function() {
+        return yellowCrossActions();
+    });
 
     //--------------------------------------------------------------------------------
 
@@ -1084,6 +1164,9 @@ function init(){
     <a href="#" id="action-red-green" class="btn">赤緑</a>
     <a href="#" id="action-green-orange" class="btn">緑橙</a>
     <a href="#" id="action-orange-blue" class="btn">橙青</a>
+  </div>
+  <div>
+    <a href="#" id="action-yellow-cross" class="btn">黄十字</a>
   </div>
   <div>
     <a href="#" id="action-shuffle" class="btn">シャッフル</a>
