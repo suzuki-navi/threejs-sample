@@ -501,7 +501,7 @@ function init(){
         return actions;
     });
 
-    setActionBtnClickEvent("action-yello-to-top", "", function() {
+    function yellowToTopActions() {
         let futureFaces = copyFaces(faces2);
         const actions = [];
         const speed = 1;
@@ -509,7 +509,7 @@ function init(){
             actions.push(action);
             rotateFaces(action, futureFaces);
         }
-        while (true) {
+        for (let i = 0; i < 100; i++) {
             if (futureFaces[13].color == colorY) {
                 pushAction({axis: "x", direction: [+1, +1, +1], speed});
                 continue;
@@ -547,7 +547,153 @@ function init(){
             break;
         }
         return actions;
+    }
+    setActionBtnClickEvent("action-yellow-to-top", "", function() {
+        return yellowToTopActions();
     });
+
+
+    function whiteEdgeActions(edgeColor) {
+        let futureFaces = copyFaces(faces2);
+        const actions = [];
+        const speed = 1;
+        function pushAction(action) {
+            actions.push(action);
+            rotateFaces(action, futureFaces);
+        }
+        const pre = yellowToTopActions();
+        if (edgeColor == colorR) {
+            pre.push({axis: "y", direction: [+1, +1, +1], speed});
+        }
+        if (edgeColor == colorG) {
+            pre.push({axis: "y", direction: [+1, +1, +1], speed});
+            pre.push({axis: "y", direction: [+1, +1, +1], speed});
+        }
+        if (edgeColor == colorO) {
+            pre.push({axis: "y", direction: [-1, -1, -1], speed});
+        }
+        for (const act of pre) {
+            pushAction(act);
+        }
+        for (let i = 0; i < 100; i++) {
+            // 上層に白が上向き
+            if (futureFaces[1].color == colorW && futureFaces[28].color == edgeColor) {
+                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                continue;
+            }
+            if (futureFaces[3].color == colorW && futureFaces[37].color == edgeColor) {
+                pushAction({axis: "y", direction: [ 0,  0, -1], speed});
+                continue;
+            }
+            if (futureFaces[5].color == colorW && futureFaces[19].color == edgeColor) {
+                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                continue;
+            }
+            if (futureFaces[7].color == colorW && futureFaces[10].color == edgeColor) {
+                pushAction({axis: "z", direction: [ 0,  0, +1], speed});
+                continue;
+            }
+
+            // 中間層
+            if (futureFaces[21].color == colorW && futureFaces[14].color == edgeColor) {
+                pushAction({axis: "z", direction: [ 0,  0, +1], speed});
+                continue;
+            }
+            if (futureFaces[30].color == colorW && futureFaces[23].color == edgeColor) {
+                pushAction({axis: "y", direction: [-1,  0,  0], speed});
+                pushAction({axis: "x", direction: [ 0,  0, +1], speed});
+                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                continue;
+            }
+            if (futureFaces[39].color == colorW && futureFaces[32].color == edgeColor) {
+                pushAction({axis: "y", direction: [-1,  0,  0], speed});
+                pushAction({axis: "y", direction: [-1,  0,  0], speed});
+                pushAction({axis: "z", direction: [-1,  0,  0], speed});
+                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                continue;
+            }
+            if (futureFaces[12].color == colorW && futureFaces[41].color == edgeColor) {
+                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                pushAction({axis: "x", direction: [-1,  0,  0], speed});
+                pushAction({axis: "y", direction: [-1,  0,  0], speed});
+                continue;
+            }
+            if (futureFaces[14].color == colorW && futureFaces[21].color == edgeColor) {
+                pushAction({axis: "y", direction: [-1,  0,  0], speed});
+                pushAction({axis: "x", direction: [ 0,  0, -1], speed});
+                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                continue;
+            }
+            if (futureFaces[23].color == colorW && futureFaces[30].color == edgeColor) {
+                pushAction({axis: "y", direction: [-1,  0,  0], speed});
+                pushAction({axis: "y", direction: [-1,  0,  0], speed});
+                pushAction({axis: "z", direction: [-1,  0,  0], speed});
+                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                continue;
+            }
+            if (futureFaces[32].color == colorW && futureFaces[39].color == edgeColor) {
+                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                pushAction({axis: "x", direction: [+1,  0,  0], speed});
+                pushAction({axis: "y", direction: [-1,  0,  0], speed});
+                continue;
+            }
+            if (futureFaces[41].color == colorW && futureFaces[12].color == edgeColor) {
+                pushAction({axis: "z", direction: [ 0,  0, -1], speed});
+                continue;
+            }
+
+            // 下層に白が下向き
+            if (futureFaces[50].color == colorW && futureFaces[25].color == edgeColor) {
+                pushAction({axis: "x", direction: [ 0,  0, -1], speed});
+                continue;
+            }
+            if (futureFaces[52].color == colorW && futureFaces[34].color == edgeColor) {
+                pushAction({axis: "z", direction: [+1,  0,  0], speed});
+                continue;
+            }
+            if (futureFaces[48].color == colorW && futureFaces[43].color == edgeColor) {
+                pushAction({axis: "x", direction: [+1,  0,  0], speed});
+                continue;
+            }
+
+            // 下層に白が側面
+            if (futureFaces[16].color == colorW && futureFaces[46].color == edgeColor) {
+                pushAction({axis: "z", direction: [ 0,  0, -1], speed});
+                continue;
+            }
+            if (futureFaces[25].color == colorW && futureFaces[50].color == edgeColor) {
+                pushAction({axis: "x", direction: [ 0,  0, -1], speed});
+                continue;
+            }
+            if (futureFaces[34].color == colorW && futureFaces[52].color == edgeColor) {
+                pushAction({axis: "z", direction: [+1,  0,  0], speed});
+                continue;
+            }
+            if (futureFaces[43].color == colorW && futureFaces[48].color == edgeColor) {
+                pushAction({axis: "x", direction: [+1,  0,  0], speed});
+                continue;
+            }
+
+            break;
+        }
+        if (actions.length == pre.length) {
+            return [];
+        }
+        return actions;
+    }
+
+    function whiteEdgeHandler(id, edgeColor) {
+        setActionBtnClickEvent(id, "", function() {
+            return whiteEdgeActions(edgeColor);
+        });
+    }
+
+    whiteEdgeHandler("action-white-blue",   colorB);
+    whiteEdgeHandler("action-white-red",    colorR);
+    whiteEdgeHandler("action-white-green",  colorG);
+    whiteEdgeHandler("action-white-orange", colorO);
 
     //--------------------------------------------------------------------------------
 
@@ -592,7 +738,11 @@ function init(){
     <a href="#" id="action-shuffle" class="btn">シャッフル</a>
   </div>
   <div>
-    <a href="#" id="action-yello-to-top" class="btn">黄を上に</a>
+    <a href="#" id="action-yellow-to-top" class="btn">黄を上に</a>
+    <a href="#" id="action-white-blue" class="btn">白青</a>
+    <a href="#" id="action-white-red" class="btn">白赤</a>
+    <a href="#" id="action-white-green" class="btn">白緑</a>
+    <a href="#" id="action-white-orange" class="btn">白橙</a>
   </div>
 
   <p>
