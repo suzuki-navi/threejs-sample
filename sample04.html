@@ -12,6 +12,9 @@
       background: #81D4FA;
       box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, .5);
   }
+  .btn-inactive {
+      background: #999999;
+  }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="OrbitControls.js"></script>
@@ -59,12 +62,22 @@ function init(){
         return faces;
     }
 
+    function copyFaces(faces) {
+        const dst = [];
+        for (let i = 0; i < 54; i++) {
+            const f = faces[i];
+            dst.push({color: f.color});
+        }
+        return dst;
+    }
+
     const faces = createHomeFaces();
+    const faces2 = copyFaces(faces);
+
     const nullRotationAction = {axis: "", direction: [0, 0, 0], speed: 1};
     let rotationAction = nullRotationAction;;
     let rotationActionStartTime = new Date().getTime();
     const actionQueue = [
-        //{axis: "x", direction: [ 0,  0, +1]},
     ];
 
     const cubeWidth = 100;
@@ -190,7 +203,167 @@ function init(){
         }
     }
 
-    function rotateFaces() {
+    function replaceBoxes(rot, cos, sin) {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const idx = 3 * i + j;
+                replaceBox(faces[idx], "y", +1, i, j, rot, cos, sin);
+            }
+        }
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const idx = 9 + 3 * i + j;
+                replaceBox(faces[idx], "z", +1, i, j, rot, cos, sin);
+            }
+        }
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const idx = 18 + 3 * i + j;
+                replaceBox(faces[idx], "x", +1, i, j, rot, cos, sin);
+            }
+        }
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const idx = 27 + 3 * i + j;
+                replaceBox(faces[idx], "z", -1, i, j, rot, cos, sin);
+            }
+        }
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const idx = 36 + 3 * i + j;
+                replaceBox(faces[idx], "x", -1, i, j, rot, cos, sin);
+            }
+        }
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const idx = 45 + 3 * i + j;
+                replaceBox(faces[idx], "y", -1, i, j, rot, cos, sin);
+            }
+        }
+    }
+
+    function actRotation() {
+        const [flag, rot, cos, sin] = calcRotationAngle();
+        if (flag) {
+            rotateFaces(rotationAction, faces);
+            if (actionQueue.length == 0) {
+                rotationAction = intervalAction(1);
+                rotationActionStartTime = 0;
+            } else if (rotationAction.axis == "") {
+                rotationAction = actionQueue.shift();
+                rotationActionStartTime = new Date().getTime();
+            } else {
+                const speed = Math.min(rotationAction.speed, actionQueue[0].speed);
+                rotationAction = intervalAction(speed);
+                rotationActionStartTime = new Date().getTime();
+            }
+            replaceBoxes(rot, cos, sin);
+        } else if (rotationAction.axis != "") {
+            replaceBoxes(rot, cos, sin);
+        }
+    }
+
+    function calcRotationAngle() {
+        const now = new Date().getTime();
+        let d = (now - rotationActionStartTime) * rotationAction.speed * 0.002;
+        if (d >= 1.0) {
+            return [true, 0.0, 1.0, 0.0];
+        } else {
+            d = d * 0.5 * Math.PI;
+            return [false, d, Math.cos(d), Math.sin(d)];
+        }
+    }
+
+    function intervalAction(speed) {
+        return {axis: "", direction: [0, 0, 0], speed: speed};
+    }
+
+    replaceBoxes(0.0, 1.0, 0.0);
+    //actRotation();
+
+    const camera = new THREE.PerspectiveCamera(90, width / height, 1, 1000);
+    function resetCamera() {
+        camera.position.set(250, 250, 400);
+        camera.lookAt(scene.position);
+    }
+    resetCamera();
+
+    const controls = new THREE.OrbitControls(camera, canvas);
+    controls.rotateSpeed = 0.5;
+    controls.update();
+
+    renderer.render(scene, camera);
+
+    function animate() {
+        requestAnimationFrame(animate);
+        actRotation();
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    function pushActionToQueue(action) {
+        actionQueue.push(action);
+        rotateFaces(action, faces2);
+    }
+
+    const btnActions = {};
+    const keyEventHandlers = {};
+    function setActionBtnClickEvent(id, key, actions) {
+        const handler = function(event) {
+            let acts;
+            if (typeof(actions) == "function") {
+                acts = actions();
+            } else {
+                acts = actions;
+            }
+            for (const act of acts) {
+                pushActionToQueue(act);
+            }
+            activateBtns();
+            if (event) {
+                event.preventDefault();
+            }
+            return false;
+        };
+
+        document.getElementById(id).addEventListener("click", handler);
+
+        btnActions[id] = actions;
+        if (key != "") {
+            keyEventHandlers[key] = handler;
+        }
+    }
+
+    function activateBtns() {
+        for (const id in btnActions) {
+            const actions = btnActions[id];
+            if (typeof(actions) == "function") {
+                acts = actions();
+                if (acts.length == 0) {
+                    document.getElementById(id).classList.add("btn-inactive");
+                } else {
+                    document.getElementById(id).classList.remove("btn-inactive");
+                }
+            }
+        }
+    }
+
+    document.getElementById("reset-camera").addEventListener("click", function(event) {
+        resetCamera();
+        event.preventDefault();
+        return false;
+    });
+
+    document.body.addEventListener("keydown", function(event) {
+        const handler = keyEventHandlers[event.key];
+        if (handler) {
+            handler();
+        }
+    });
+
+    //--------------------------------------------------------------------------------
+
+    function rotateFaces(rotationAction, faces) {
         function rotate1(i1, i2, i3, i4) {
             const tmp = faces[i1];
             faces[i1] = faces[i4];
@@ -257,126 +430,6 @@ function init(){
         }
     }
 
-    function replaceBoxes(rot, cos, sin) {
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                const idx = 3 * i + j;
-                replaceBox(faces[idx], "y", +1, i, j, rot, cos, sin);
-            }
-        }
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                const idx = 9 + 3 * i + j;
-                replaceBox(faces[idx], "z", +1, i, j, rot, cos, sin);
-            }
-        }
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                const idx = 18 + 3 * i + j;
-                replaceBox(faces[idx], "x", +1, i, j, rot, cos, sin);
-            }
-        }
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                const idx = 27 + 3 * i + j;
-                replaceBox(faces[idx], "z", -1, i, j, rot, cos, sin);
-            }
-        }
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                const idx = 36 + 3 * i + j;
-                replaceBox(faces[idx], "x", -1, i, j, rot, cos, sin);
-            }
-        }
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                const idx = 45 + 3 * i + j;
-                replaceBox(faces[idx], "y", -1, i, j, rot, cos, sin);
-            }
-        }
-    }
-
-    function actRotation() {
-        const [flag, rot, cos, sin] = calcRotationAngle();
-        if (flag) {
-            rotateFaces();
-            if (actionQueue.length == 0) {
-                rotationAction = intervalAction(1);
-                rotationActionStartTime = 0;
-            } else if (rotationAction.axis == "") {
-                rotationAction = actionQueue.shift();
-                rotationActionStartTime = new Date().getTime();
-            } else {
-                const speed = Math.min(rotationAction.speed, actionQueue[0].speed);
-                rotationAction = intervalAction(speed);
-                rotationActionStartTime = new Date().getTime();
-            }
-            replaceBoxes(rot, cos, sin);
-        } else if (rotationAction.axis != "") {
-            replaceBoxes(rot, cos, sin);
-        }
-    }
-
-    function calcRotationAngle() {
-        const now = new Date().getTime();
-        let d = (now - rotationActionStartTime) * rotationAction.speed * 0.002;
-        if (d >= 1.0) {
-            return [true, 0.0, 1.0, 0.0];
-        } else {
-            d = d * 0.5 * Math.PI;
-            return [false, d, Math.cos(d), Math.sin(d)];
-        }
-    }
-
-    function intervalAction(speed) {
-        return {axis: "", direction: [0, 0, 0], speed: speed};
-    }
-
-    replaceBoxes(0.0, 1.0, 0.0);
-    //actRotation();
-
-    const camera = new THREE.PerspectiveCamera(90, width / height, 1, 1000);
-    function resetCamera() {
-        camera.position.set(250, 250, 400);
-        camera.lookAt(scene.position);
-    }
-    resetCamera();
-
-    const controls = new THREE.OrbitControls(camera, canvas);
-    controls.rotateSpeed = 0.5;
-    controls.update();
-
-    renderer.render(scene, camera);
-
-    function animate() {
-        requestAnimationFrame(animate);
-        actRotation();
-        controls.update();
-        renderer.render(scene, camera);
-    }
-
-    const keyEventHandlers = {};
-    function setActionBtnClickEvent(id, key, actions) {
-        const handler = function(event) {
-            let acts;
-            if (typeof(actions) == "function") {
-                acts = actions();
-            } else {
-                acts = actions;
-            }
-            for (const act of acts) {
-                actionQueue.push(act);
-            }
-            if (event) {
-                event.preventDefault();
-            }
-            return false;
-        };
-        document.getElementById(id).addEventListener("click", handler);
-        if (key != "") {
-            keyEventHandlers[key] = handler;
-        }
-    }
     setActionBtnClickEvent("action-r1", "r", [{axis: "x", direction: [ 0,  0, +1], speed: 1}]);
     setActionBtnClickEvent("action-r3", "R", [{axis: "x", direction: [ 0,  0, -1], speed: 1}]);
     setActionBtnClickEvent("action-l1", "l", [{axis: "x", direction: [-1,  0,  0], speed: 1}]);
@@ -398,8 +451,8 @@ function init(){
 
     setActionBtnClickEvent("action-shuffle", "", function() {
         const actions = [];
-        const speed = 4;
-        for (let i = 0; i < 20; i++) {
+        const speed = 6;
+        for (let i = 0; i < 15; i++) {
             let axis = Math.floor(Math.random() * 3);
             if (axis == 0) {
                 axis = "x";
@@ -418,20 +471,59 @@ function init(){
         return actions;
     });
 
-    document.getElementById("reset-camera").addEventListener("click", function(event) {
-        resetCamera();
-        event.preventDefault();
-        return false;
+    setActionBtnClickEvent("action-white-to-top", "", function() {
+        let futureFaces = copyFaces(faces2);
+        const actions = [];
+        const speed = 1;
+        function pushAction(action) {
+            actions.push(action);
+            rotateFaces(action, futureFaces);
+        }
+        while (true) {
+            if (futureFaces[13].color == colorW) {
+                pushAction({axis: "x", direction: [+1, +1, +1], speed});
+                continue;
+            }
+            if (futureFaces[22].color == colorW) {
+                pushAction({axis: "z", direction: [-1, -1, -1], speed});
+                continue;
+            }
+            if (futureFaces[31].color == colorW) {
+                pushAction({axis: "x", direction: [-1, -1, -1], speed});
+                continue;
+            }
+            if (futureFaces[40].color == colorW) {
+                pushAction({axis: "z", direction: [+1, +1, +1], speed});
+                continue;
+            }
+            if (futureFaces[49].color == colorW) {
+                pushAction({axis: "x", direction: [+1, +1, +1], speed});
+                continue;
+            }
+
+            if (futureFaces[22].color == colorG) {
+                pushAction({axis: "y", direction: [+1, +1, +1], speed});
+                continue;
+            }
+            if (futureFaces[31].color == colorG) {
+                pushAction({axis: "y", direction: [+1, +1, +1], speed});
+                continue;
+            }
+            if (futureFaces[40].color == colorG) {
+                pushAction({axis: "y", direction: [-1, -1, -1], speed});
+                continue;
+            }
+
+            break;
+        }
+        return actions;
     });
 
-    document.body.addEventListener("keydown", function(event) {
-        const handler = keyEventHandlers[event.key];
-        if (handler) {
-            handler();
-        }
-    });
+    //--------------------------------------------------------------------------------
 
     animate();
+    activateBtns();
+
 }
 
 </script>
@@ -464,6 +556,9 @@ function init(){
   </div>
   <div>
     <a href="#" id="action-shuffle" class="btn">シャッフル</a>
+  </div>
+  <div>
+    <a href="#" id="action-white-to-top" class="btn">白を上に</a>
   </div>
 
   <p>
