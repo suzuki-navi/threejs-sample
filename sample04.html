@@ -326,10 +326,12 @@ function init(){
             } else {
                 acts = actions;
             }
-            for (const act of acts) {
-                pushActionToQueue(act);
+            if (acts != null) {
+                for (const act of acts) {
+                    pushActionToQueue(act);
+                }
+                activateBtns();
             }
-            activateBtns();
             if (event) {
                 event.preventDefault();
             }
@@ -349,12 +351,22 @@ function init(){
             const actions = btnActions[id];
             if (typeof(actions) == "function") {
                 acts = actions();
-                if (acts.length == 0) {
+                if (acts == null || acts.length == 0) {
                     document.getElementById(id).classList.add("btn-inactive");
                 } else {
                     document.getElementById(id).classList.remove("btn-inactive");
                 }
             }
+        }
+    }
+
+    function isSolved(actions) {
+        if (actions == null) {
+            return false;
+        } else if (actions.length > 0) {
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -581,6 +593,9 @@ function init(){
                 continue;
             }
 
+            if (futureFaces[13].color == colorB) {
+                break;
+            }
             if (futureFaces[22].color == colorB) {
                 pushAction("y", [+1, +1, +1]);
                 continue;
@@ -594,14 +609,10 @@ function init(){
                 continue;
             }
 
-            break;
+            return null;
         }
         return actions;
     }
-    setActionBtnClickEvent("action-yellow-to-top", "", function() {
-        return yellowToTopActions();
-    });
-
 
     function whiteEdgeActions(edgeColor) {
         let futureFaces = copyFaces(faces2);
@@ -612,8 +623,8 @@ function init(){
             actions.push(action);
             rotateFaces(action, futureFaces);
         }
-        if (yellowToTopActions().length > 0) {
-            return [];
+        if (!isSolved(yellowToTopActions())) {
+            return null;
         }
         if (edgeColor == colorR) {
             pushAction("y", [+1, +1, +1]);
@@ -730,6 +741,10 @@ function init(){
             }
 
             // 下層に白が下向き
+            // 前
+            if (futureFaces[46].color == colorW && futureFaces[16].color == edgeColor) {
+                break;
+            }
             // 右
             if (futureFaces[50].color == colorW && futureFaces[25].color == edgeColor) {
                 pushAction("x", [ 0,  0, -1]);
@@ -768,11 +783,125 @@ function init(){
                 continue;
             }
 
-            break;
+            return null;
         }
-        //return actions;
         return normalizeActions(actions);
     }
+
+    function whiteCornerActions(edgeColor1, edgeColor2) {
+        let futureFaces = copyFaces(faces2);
+        const actions = [];
+        const speed = 1;
+        function pushAction(axis, direction) {
+            const action = {axis, direction, speed};
+            actions.push(action);
+            rotateFaces(action, futureFaces);
+        }
+        if (!isSolved(whiteEdgeActions(edgeColor1))) {
+            return [];
+        }
+        if (!isSolved(whiteEdgeActions(edgeColor2))) {
+            return [];
+        }
+        if (edgeColor1 == colorR) {
+            pushAction("y", [+1, +1, +1]);
+        }
+        if (edgeColor1 == colorG) {
+            pushAction("y", [+1, +1, +1]);
+            pushAction("y", [+1, +1, +1]);
+        }
+        if (edgeColor1 == colorO) {
+            pushAction("y", [-1, -1, -1]);
+        }
+        for (let i = 0; i < 100; i++) {
+            // 上層
+            if (futureFaces[11].color == colorW && futureFaces[8].color == edgeColor1 && futureFaces[18].color == edgeColor2) {
+                pushAction("y", [ 0,  0, +1]);
+                continue;
+            }
+            if (futureFaces[20].color == colorW && futureFaces[2].color == edgeColor1 && futureFaces[27].color == edgeColor2) {
+                pushAction("y", [ 0,  0, +1]);
+                continue;
+            }
+            if (futureFaces[29].color == colorW && futureFaces[0].color == edgeColor1 && futureFaces[36].color == edgeColor2) {
+                pushAction("y", [ 0,  0, -1]);
+                continue;
+            }
+            if (futureFaces[38].color == colorW && futureFaces[6].color == edgeColor1 && futureFaces[9].color == edgeColor2) {
+                pushAction("x", [ 0,  0, +1]);
+                pushAction("y", [ 0,  0, -1]);
+                pushAction("x", [ 0,  0, -1]);
+                continue;
+            }
+            if (futureFaces[18].color == colorW && futureFaces[11].color == edgeColor1 && futureFaces[8].color == edgeColor2) {
+                pushAction("y", [ 0,  0, -1]);
+                continue;
+            }
+            if (futureFaces[27].color == colorW && futureFaces[20].color == edgeColor1 && futureFaces[2].color == edgeColor2) {
+                pushAction("z", [ 0,  0, -1]);
+                pushAction("y", [ 0,  0, +1]);
+                pushAction("z", [ 0,  0, +1]);
+                continue;
+            }
+            if (futureFaces[36].color == colorW && futureFaces[29].color == edgeColor1 && futureFaces[0].color == edgeColor2) {
+                pushAction("y", [ 0,  0, +1]);
+                continue;
+            }
+            if (futureFaces[9].color == colorW && futureFaces[38].color == edgeColor1 && futureFaces[6].color == edgeColor2) {
+                pushAction("y", [ 0,  0, -1]);
+                continue;
+            }
+            if (futureFaces[8].color == colorW && futureFaces[18].color == edgeColor1 && futureFaces[11].color == edgeColor2) {
+                pushAction("x", [ 0,  0, +1]);
+                pushAction("y", [ 0,  0, -1]);
+                pushAction("x", [ 0,  0, -1]);
+                continue;
+            }
+            if (futureFaces[2].color == colorW && futureFaces[27].color == edgeColor1 && futureFaces[20].color == edgeColor2) {
+                pushAction("y", [ 0,  0, +1]);
+                continue;
+            }
+            if (futureFaces[0].color == colorW && futureFaces[36].color == edgeColor1 && futureFaces[29].color == edgeColor2) {
+                pushAction("y", [ 0,  0, +1]);
+                continue;
+            }
+            if (futureFaces[6].color == colorW && futureFaces[9].color == edgeColor1 && futureFaces[38].color == edgeColor2) {
+                pushAction("y", [ 0,  0, -1]);
+                continue;
+            }
+
+            // 下層
+            if (futureFaces[47].color == colorW && futureFaces[17].color == edgeColor1 && futureFaces[24].color == edgeColor2) {
+                break;
+            }
+            if (futureFaces[17].color == colorW && futureFaces[24].color == edgeColor1 && futureFaces[47].color == edgeColor2) {
+                pushAction("z", [ 0,  0, -1]);
+                pushAction("y", [ 0,  0, -1]);
+                pushAction("z", [ 0,  0, +1]);
+                continue;
+            }
+            if (futureFaces[24].color == colorW && futureFaces[47].color == edgeColor1 && futureFaces[17].color == edgeColor2) {
+                pushAction("x", [ 0,  0, +1]);
+                pushAction("y", [ 0,  0, -1]);
+                pushAction("x", [ 0,  0, -1]);
+                continue;
+            }
+            // いったん脱出のみ
+            if (futureFaces[47].color == colorW || futureFaces[17].color == colorW || futureFaces[24].color == colorW) {
+                pushAction("x", [ 0,  0, +1]);
+                pushAction("y", [ 0,  0, -1]);
+                pushAction("x", [ 0,  0, -1]);
+                break;
+            }
+
+            return null;
+        }
+        return normalizeActions(actions);
+    }
+
+    setActionBtnClickEvent("action-yellow-to-top", "", function() {
+        return yellowToTopActions();
+    });
 
     function whiteEdgeHandler(id, edgeColor) {
         setActionBtnClickEvent(id, "", function() {
@@ -784,6 +913,17 @@ function init(){
     whiteEdgeHandler("action-white-red",    colorR);
     whiteEdgeHandler("action-white-green",  colorG);
     whiteEdgeHandler("action-white-orange", colorO);
+
+    function whiteCornerHandler(id, edgeColor1, edgeColor2) {
+        setActionBtnClickEvent(id, "", function() {
+            return whiteCornerActions(edgeColor1, edgeColor2);
+        });
+    }
+
+    whiteCornerHandler("action-white-blue-red",     colorB, colorR);
+    whiteCornerHandler("action-white-red-green",    colorR, colorG);
+    whiteCornerHandler("action-white-green-orange", colorG, colorO);
+    whiteCornerHandler("action-white-orange-blue",  colorO, colorB);
 
     //--------------------------------------------------------------------------------
 
@@ -826,10 +966,18 @@ function init(){
   </div>
   <div>
     <a href="#" id="action-yellow-to-top" class="btn">黄を上に</a>
+  </div>
+  <div>
     <a href="#" id="action-white-blue" class="btn">白青</a>
     <a href="#" id="action-white-red" class="btn">白赤</a>
     <a href="#" id="action-white-green" class="btn">白緑</a>
     <a href="#" id="action-white-orange" class="btn">白橙</a>
+  </div>
+  <div>
+    <a href="#" id="action-white-blue-red" class="btn">白青赤</a>
+    <a href="#" id="action-white-red-green" class="btn">白赤緑</a>
+    <a href="#" id="action-white-green-orange" class="btn">白緑橙</a>
+    <a href="#" id="action-white-orange-blue" class="btn">白橙青</a>
   </div>
   <div>
     <a href="#" id="action-shuffle" class="btn">シャッフル</a>
