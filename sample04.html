@@ -24,7 +24,7 @@ function init(){
 
     const canvas = document.querySelector('#rubiks');
     const width = 350;
-    const height = 350;
+    const height = 250;
 
     const renderer = new THREE.WebGLRenderer({canvas, antialias: true});
     renderer.setSize(width, height);
@@ -266,10 +266,12 @@ function init(){
     function calcRotationAngle() {
         const now = new Date().getTime();
         let a = 0.001;
-        if (actionQueue.length >= 16) {
+        if (actionQueue.length >= 17) {
             a = 0.008;
-        } else if (actionQueue.length >= 4) {
-            a = 0.004;
+        } else if (actionQueue.length >= 5) {
+            a = 0.005;
+        } else if (actionQueue.length >= 1) {
+            a = 0.003;
         } else {
             a = 0.002;
         }
@@ -289,13 +291,16 @@ function init(){
     replaceBoxes(0.0, 1.0, 0.0);
     //actRotation();
 
-    const camera = new THREE.PerspectiveCamera(90, width / height, 1, 1000);
+    const camera = new THREE.PerspectiveCamera(65, width / height, 1, 1000);
+    const cameraX = 240;
+    const cameraY = 240;
+    const cameraZ = 320;
     function resetCamera() {
-        camera.position.set(200, 200, 320);
+        camera.position.set(cameraX, cameraY, cameraZ);
         camera.lookAt(scene.position);
     }
     function resetCameraBottom() {
-        camera.position.set(200, -200, 320);
+        camera.position.set(cameraX, -cameraY, cameraZ);
         camera.lookAt(scene.position);
     }
     function resetCameraReverse() {
@@ -320,7 +325,29 @@ function init(){
     }
 
     function pushActionToQueue(action) {
-        actionQueue.push(action);
+        let flag = false;
+        if (actionQueue.length > 0) {
+            const lastAction = actionQueue[actionQueue.length - 1];
+            if (lastAction.axis == action.axis) {
+                const direction = [
+                    lastAction.direction[0] + action.direction[0],
+                    lastAction.direction[1] + action.direction[1],
+                    lastAction.direction[2] + action.direction[2],
+                ];
+                const max = Math.max(...direction);
+                const min = Math.min(...direction);
+                if (max == 0 && min == 0) {
+                    actionQueue.pop();
+                    flag = true;
+                } else if (max <= +1 && min >= -1) {
+                    lastAction.direction = direction;
+                    flag = true;
+                }
+            }
+        }
+        if (!flag) {
+            actionQueue.push(action);
+        }
         rotateFaces(action, faces2);
     }
 
@@ -550,8 +577,8 @@ function init(){
 
     setActionBtnClickEvent("action-shuffle", "", function() {
         const actions = [];
-        const speed = 6;
-        for (let i = 0; i < 15; i++) {
+        const speed = 1;
+        for (let i = 0; i < 20; i++) {
             let axis = Math.floor(Math.random() * 3);
             if (axis == 0) {
                 axis = "x";
@@ -1147,6 +1174,107 @@ function init(){
                 continue;
             }
 
+            if (futureFaces[9].color != colorY || futureFaces[11].color != colorY) {
+                pushAction("y", [+1, +1, +1]);
+                continue;
+            }
+
+            if (futureFaces[27].color == colorY) {
+                pushAction("y", [-1, -1, -1]);
+                pushActionSet();
+                continue;
+            }
+
+            if (true) {
+                pushAction("y", [+1, +1, +1]);
+                pushActionSet();
+                continue;
+            }
+
+            return null;
+        }
+        return normalizeActions(actions);
+    }
+
+    function yellowCornerPosActions() {
+        let futureFaces = copyFaces(faces2);
+        const actions = [];
+        const speed = 1;
+        function pushAction(axis, direction) {
+            const action = {axis, direction, speed};
+            actions.push(action);
+            rotateFaces(action, futureFaces);
+        }
+        if (!isSolved(yellowCornerActions())) {
+            return null;
+        }
+        function pushActionSet() {
+            pushAction("x", [ 0,  0, -1]);
+            pushAction("y", [ 0,  0, +1]);
+            pushAction("x", [+1,  0,  0]);
+            pushAction("y", [ 0,  0, +1]);
+            pushAction("y", [ 0,  0, +1]);
+            pushAction("x", [ 0,  0, +1]);
+            pushAction("y", [ 0,  0, -1]);
+            pushAction("x", [ 0,  0, -1]);
+            pushAction("y", [ 0,  0, +1]);
+            pushAction("y", [ 0,  0, +1]);
+            pushAction("x", [-1,  0, +1]);
+        }
+        for (let i = 0; i < 100; i++) {
+            if (futureFaces[9].color == futureFaces[11].color &&
+                futureFaces[18].color == futureFaces[20].color &&
+                futureFaces[27].color == futureFaces[29].color &&
+                futureFaces[36].color == futureFaces[38].color) {
+                if (futureFaces[9].color == colorB && futureFaces[18].color == colorR) {
+                    break;
+                } else if (futureFaces[9].color == colorR && futureFaces[18].color == colorG) {
+                    pushAction("y", [ 0,  0, -1]);
+                    break;
+                } else if (futureFaces[9].color == colorG && futureFaces[18].color == colorO) {
+                    pushAction("y", [ 0,  0, +1]);
+                    pushAction("y", [ 0,  0, +1]);
+                    break;
+                } else if (futureFaces[9].color == colorO && futureFaces[18].color == colorB) {
+                    pushAction("y", [ 0,  0, +1]);
+                    break;
+                }
+            }
+
+            if (futureFaces[9].color == futureFaces[11].color && futureFaces[18].color == futureFaces[20].color) {
+                pushActionSet();
+                continue;
+            }
+            if (futureFaces[18].color == futureFaces[20].color && futureFaces[27].color == futureFaces[29].color) {
+                pushAction("y", [+1, +1, +1]);
+                continue;
+            }
+            if (futureFaces[27].color == futureFaces[29].color && futureFaces[36].color == futureFaces[38].color) {
+                pushAction("y", [+1, +1, +1]);
+                continue;
+            }
+            if (futureFaces[36].color == futureFaces[38].color && futureFaces[9].color == futureFaces[11].color) {
+                pushAction("y", [-1, -1, -1]);
+                continue;
+            }
+
+            if (futureFaces[9].color == futureFaces[11].color) {
+                pushActionSet();
+                continue;
+            }
+            if (futureFaces[18].color == futureFaces[20].color) {
+                pushAction("y", [+1, +1, +1]);
+                continue;
+            }
+            if (futureFaces[27].color == futureFaces[29].color) {
+                pushAction("y", [+1, +1, +1]);
+                continue;
+            }
+            if (futureFaces[36].color == futureFaces[38].color) {
+                pushAction("y", [-1, -1, -1]);
+                continue;
+            }
+
             if (true) {
                 pushActionSet();
                 continue;
@@ -1199,6 +1327,10 @@ function init(){
         return yellowCornerActions();
     });
 
+    setActionBtnClickEvent("action-yellow-corner-pos", "", function() {
+        return yellowCornerPosActions();
+    });
+
     //--------------------------------------------------------------------------------
 
     animate();
@@ -1239,7 +1371,7 @@ function init(){
     <a href="#" id="action-z3" class="btn">Z'</a>
   </div>
   <div>
-    <a href="#" id="action-yellow-to-top" class="btn">黄を上に</a>
+    <a href="#" id="action-yellow-to-top" class="btn">全体方向</a>
     <a href="#" id="action-white-blue" class="btn">白青</a>
     <a href="#" id="action-white-red" class="btn">白赤</a>
     <a href="#" id="action-white-green" class="btn">白緑</a>
@@ -1259,7 +1391,8 @@ function init(){
   </div>
   <div>
     <a href="#" id="action-yellow-edge" class="btn">黄エッジ</a>
-    <a href="#" id="action-yellow-corner" class="btn">黄コーナー</a>
+    <a href="#" id="action-yellow-corner" class="btn">黄コーナー方向</a>
+    <a href="#" id="action-yellow-corner-pos" class="btn">黄コーナー位置</a>
   </div>
   <div>
     <a href="#" id="action-shuffle" class="btn">シャッフル</a>
