@@ -40,7 +40,7 @@ function init(){
     const colorB = 0x0000ff;
     const colorR = 0xff0000;
     const colorG = 0x00ff00;
-    const colorO = 0xff8800;
+    const colorO = 0xff4400;
     const colorW = 0xffffff;
     const colorE = 0x000000;
 
@@ -81,13 +81,13 @@ function init(){
     ];
 
     const cubeWidth = 100;
-    const cubePadding = 15;
+    const cubePadding = 20;
     const faceDepth = 5;
     const rubiksHalfWidth = (cubeWidth * 3 - faceDepth) * 0.5;
 
     function createBox(color, axis) {
-        const material1 = new THREE.MeshBasicMaterial({color: color});
-        const material2 = new THREE.MeshBasicMaterial({color: colorE});
+        const material1 = new THREE.MeshBasicMaterial({color: color,  opacity: 0.8, transparent: true});
+        const material2 = new THREE.MeshBasicMaterial({color: colorE, opacity: 0.4, transparent: true});
         const materials = [material2, material2, material2, material2, material2, material2];
         let w, h, d;
         if (axis == "x") {
@@ -735,14 +735,14 @@ function init(){
     <a href="#" id="action-z3" class="btn">Z'</a>
   </div>
   <div>
-    <a href="#" id="action-shuffle" class="btn">シャッフル</a>
-  </div>
-  <div>
     <a href="#" id="action-yellow-to-top" class="btn">黄を上に</a>
     <a href="#" id="action-white-blue" class="btn">白青</a>
     <a href="#" id="action-white-red" class="btn">白赤</a>
     <a href="#" id="action-white-green" class="btn">白緑</a>
     <a href="#" id="action-white-orange" class="btn">白橙</a>
+  </div>
+  <div>
+    <a href="#" id="action-shuffle" class="btn">シャッフル</a>
   </div>
 
   <p>
