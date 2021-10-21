@@ -286,6 +286,16 @@ function init(){
         camera.position.set(250, 250, 400);
         camera.lookAt(scene.position);
     }
+    function resetCameraBottom() {
+        camera.position.set(250, -250, 400);
+        camera.lookAt(scene.position);
+    }
+    function resetCameraReverse() {
+        camera.position.x = -camera.position.x;
+        camera.position.y = -camera.position.y;
+        camera.position.z = -camera.position.z;
+        camera.lookAt(scene.position);
+    }
     resetCamera();
 
     const controls = new THREE.OrbitControls(camera, canvas);
@@ -350,6 +360,16 @@ function init(){
 
     document.getElementById("reset-camera").addEventListener("click", function(event) {
         resetCamera();
+        event.preventDefault();
+        return false;
+    });
+    document.getElementById("reset-camera-bottom").addEventListener("click", function(event) {
+        resetCameraBottom();
+        event.preventDefault();
+        return false;
+    });
+    document.getElementById("reset-camera-reverse").addEventListener("click", function(event) {
+        resetCameraReverse();
         event.preventDefault();
         return false;
     });
@@ -562,7 +582,9 @@ function init(){
   </div>
 
   <p>
-    <a href="#" id="reset-camera">reset camera</a>
+    <a href="#" id="reset-camera">視点をリセット</a>
+    <a href="#" id="reset-camera-bottom">視点を下から</a>
+    <a href="#" id="reset-camera-reverse">視点を反対側から</a>
   </p>
 </body>
 </html>
