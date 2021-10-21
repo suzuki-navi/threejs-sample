@@ -456,6 +456,55 @@ function init(){
         }
     }
 
+    function normalizeActions(actions) {
+        let result = [...actions];
+        let i = 0;
+        function dirMul(direction, sign) {
+            if (sign > 0) {
+                return direction;
+            } else {
+                return [-direction[2], -direction[1], -direction[0]];
+            }
+        }
+        while (i < result.length) {
+            const acti = result[i];
+            if (acti.direction[0] != 0 && acti.direction[0] == acti.direction[1] && acti.direction[0] == acti.direction[2]) {
+                let j = i + 1;
+                const sign = acti.direction[0];
+                const axis = acti.axis;
+                while (j < result.length) {
+                    const actj = result[j];
+                    if (actj.axis == axis) {
+                        result[j - 1] = {axis: actj.axis, direction: actj.direction, speed: actj.speed};
+                    } else if (axis == "x") {
+                        if (actj.axis == "y") {
+                            result[j - 1] = {axis: "z", direction: dirMul(actj.direction, +sign), speed: actj.speed};
+                        } else if (actj.axis == "z") {
+                            result[j - 1] = {axis: "y", direction: dirMul(actj.direction, -sign), speed: actj.speed};
+                        }
+                    } else if (axis == "y") {
+                        if (actj.axis == "z") {
+                            result[j - 1] = {axis: "x", direction: dirMul(actj.direction, +sign), speed: actj.speed};
+                        } else if (actj.axis == "x") {
+                            result[j - 1] = {axis: "z", direction: dirMul(actj.direction, -sign), speed: actj.speed};
+                        }
+                    } else if (axis == "z") {
+                        if (actj.axis == "x") {
+                            result[j - 1] = {axis: "y", direction: dirMul(actj.direction, +sign), speed: actj.speed};
+                        } else if (actj.axis == "y") {
+                            result[j - 1] = {axis: "x", direction: dirMul(actj.direction, -sign), speed: actj.speed};
+                        }
+                    }
+                    j++;
+                }
+                result.pop();
+                continue;
+            }
+            i++;
+        }
+        return result;
+    }
+
     setActionBtnClickEvent("action-r1", "r", [{axis: "x", direction: [ 0,  0, +1], speed: 1}]);
     setActionBtnClickEvent("action-r3", "R", [{axis: "x", direction: [ 0,  0, -1], speed: 1}]);
     setActionBtnClickEvent("action-l1", "l", [{axis: "x", direction: [-1,  0,  0], speed: 1}]);
@@ -577,34 +626,64 @@ function init(){
         }
         for (let i = 0; i < 100; i++) {
             // 上層に白が上向き
-            if (futureFaces[1].color == colorW && futureFaces[28].color == edgeColor) {
-                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
-                continue;
-            }
-            if (futureFaces[3].color == colorW && futureFaces[37].color == edgeColor) {
-                pushAction({axis: "y", direction: [ 0,  0, -1], speed});
-                continue;
-            }
-            if (futureFaces[5].color == colorW && futureFaces[19].color == edgeColor) {
-                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
-                continue;
-            }
+            // 前
             if (futureFaces[7].color == colorW && futureFaces[10].color == edgeColor) {
                 pushAction({axis: "z", direction: [ 0,  0, +1], speed});
                 continue;
             }
+            // 右
+            if (futureFaces[5].color == colorW && futureFaces[19].color == edgeColor) {
+                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                continue;
+            }
+            // 后
+            if (futureFaces[1].color == colorW && futureFaces[28].color == edgeColor) {
+                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                continue;
+            }
+            // 左
+            if (futureFaces[3].color == colorW && futureFaces[37].color == edgeColor) {
+                pushAction({axis: "y", direction: [ 0,  0, -1], speed});
+                continue;
+            }
+
+            // 上層に白が側面
+            // 前
+            if (futureFaces[10].color == colorW && futureFaces[7].color == edgeColor) {
+                pushAction({axis: "z", direction: [ 0,  0, +1], speed});
+                continue;
+            }
+            // 右
+            if (futureFaces[19].color == colorW && futureFaces[5].color == edgeColor) {
+                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                continue;
+            }
+            // 后
+            if (futureFaces[28].color == colorW && futureFaces[1].color == edgeColor) {
+                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                continue;
+            }
+            // 左
+            if (futureFaces[37].color == colorW && futureFaces[3].color == edgeColor) {
+                pushAction({axis: "y", direction: [ 0,  0, -1], speed});
+                continue;
+            }
 
             // 中間層
+            // 白が右で、対象が前
             if (futureFaces[21].color == colorW && futureFaces[14].color == edgeColor) {
                 pushAction({axis: "z", direction: [ 0,  0, +1], speed});
                 continue;
             }
+            // 白が后で、対象が右
             if (futureFaces[30].color == colorW && futureFaces[23].color == edgeColor) {
                 pushAction({axis: "y", direction: [-1,  0,  0], speed});
                 pushAction({axis: "x", direction: [ 0,  0, +1], speed});
                 pushAction({axis: "y", direction: [+1,  0,  0], speed});
                 continue;
             }
+            // 白が左で、対象が后
             if (futureFaces[39].color == colorW && futureFaces[32].color == edgeColor) {
                 pushAction({axis: "y", direction: [-1,  0,  0], speed});
                 pushAction({axis: "y", direction: [-1,  0,  0], speed});
@@ -613,64 +692,76 @@ function init(){
                 pushAction({axis: "y", direction: [+1,  0,  0], speed});
                 continue;
             }
+            // 白が前で、対象が左
             if (futureFaces[12].color == colorW && futureFaces[41].color == edgeColor) {
                 pushAction({axis: "y", direction: [+1,  0,  0], speed});
                 pushAction({axis: "x", direction: [-1,  0,  0], speed});
                 pushAction({axis: "y", direction: [-1,  0,  0], speed});
                 continue;
             }
+            // 白が前で、対象が右
             if (futureFaces[14].color == colorW && futureFaces[21].color == edgeColor) {
                 pushAction({axis: "y", direction: [-1,  0,  0], speed});
                 pushAction({axis: "x", direction: [ 0,  0, -1], speed});
                 pushAction({axis: "y", direction: [+1,  0,  0], speed});
                 continue;
             }
+            // 白が右で、対象が后
             if (futureFaces[23].color == colorW && futureFaces[30].color == edgeColor) {
                 pushAction({axis: "y", direction: [-1,  0,  0], speed});
                 pushAction({axis: "y", direction: [-1,  0,  0], speed});
-                pushAction({axis: "z", direction: [-1,  0,  0], speed});
+                pushAction({axis: "z", direction: [+1,  0,  0], speed});
                 pushAction({axis: "y", direction: [+1,  0,  0], speed});
                 pushAction({axis: "y", direction: [+1,  0,  0], speed});
                 continue;
             }
+            // 白が后で、対象が左
             if (futureFaces[32].color == colorW && futureFaces[39].color == edgeColor) {
                 pushAction({axis: "y", direction: [+1,  0,  0], speed});
                 pushAction({axis: "x", direction: [+1,  0,  0], speed});
                 pushAction({axis: "y", direction: [-1,  0,  0], speed});
                 continue;
             }
+            // 白が左で、対象が前
             if (futureFaces[41].color == colorW && futureFaces[12].color == edgeColor) {
                 pushAction({axis: "z", direction: [ 0,  0, -1], speed});
                 continue;
             }
 
             // 下層に白が下向き
+            // 右
             if (futureFaces[50].color == colorW && futureFaces[25].color == edgeColor) {
                 pushAction({axis: "x", direction: [ 0,  0, -1], speed});
                 continue;
             }
+            // 后
             if (futureFaces[52].color == colorW && futureFaces[34].color == edgeColor) {
                 pushAction({axis: "z", direction: [+1,  0,  0], speed});
                 continue;
             }
+            // 左
             if (futureFaces[48].color == colorW && futureFaces[43].color == edgeColor) {
                 pushAction({axis: "x", direction: [+1,  0,  0], speed});
                 continue;
             }
 
             // 下層に白が側面
+            // 前
             if (futureFaces[16].color == colorW && futureFaces[46].color == edgeColor) {
                 pushAction({axis: "z", direction: [ 0,  0, -1], speed});
                 continue;
             }
+            // 右
             if (futureFaces[25].color == colorW && futureFaces[50].color == edgeColor) {
                 pushAction({axis: "x", direction: [ 0,  0, -1], speed});
                 continue;
             }
+            // 后
             if (futureFaces[34].color == colorW && futureFaces[52].color == edgeColor) {
                 pushAction({axis: "z", direction: [+1,  0,  0], speed});
                 continue;
             }
+            // 左
             if (futureFaces[43].color == colorW && futureFaces[48].color == edgeColor) {
                 pushAction({axis: "x", direction: [+1,  0,  0], speed});
                 continue;
@@ -678,10 +769,8 @@ function init(){
 
             break;
         }
-        if (actions.length == pre.length) {
-            return [];
-        }
-        return actions;
+        //return actions;
+        return normalizeActions(actions);
     }
 
     function whiteEdgeHandler(id, edgeColor) {
