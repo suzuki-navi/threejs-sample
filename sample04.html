@@ -266,7 +266,9 @@ function init(){
     function calcRotationAngle() {
         const now = new Date().getTime();
         let a = 0.001;
-        if (actionQueue.length >= 17) {
+        if (actionQueue.length >= 53) {
+            a = 0.013;
+        } else if (actionQueue.length >= 17) {
             a = 0.008;
         } else if (actionQueue.length >= 5) {
             a = 0.005;
@@ -345,9 +347,15 @@ function init(){
                 }
             }
         }
-        if (!flag) {
-            actionQueue.push(action);
+        if (flag) {
+            rotateFaces(action, faces2);
+            return;
         }
+        if (actionQueue.length > 200) {
+            console.log("ERROR");
+            return;
+        }
+        actionQueue.push(action);
         rotateFaces(action, faces2);
     }
 
@@ -606,7 +614,7 @@ function init(){
             actions.push(action);
             rotateFaces(action, futureFaces);
         }
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 10; i++) {
             if (futureFaces[13].color == colorY) {
                 pushAction("x", [+1, +1, +1]);
                 continue;
@@ -671,7 +679,7 @@ function init(){
         if (edgeColor == colorO) {
             pushAction("y", [-1, -1, -1]);
         }
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 10; i++) {
             // 上層に白が上向き
             // 前
             if (futureFaces[7].color == colorW && futureFaces[10].color == edgeColor) {
@@ -848,7 +856,7 @@ function init(){
         if (edgeColor1 == colorO) {
             pushAction("y", [-1, -1, -1]);
         }
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 10; i++) {
             // 上層
             if (futureFaces[11].color == colorW && futureFaces[8].color == edgeColor1 && futureFaces[18].color == edgeColor2) {
                 pushAction("y", [ 0,  0, +1]);
@@ -956,7 +964,7 @@ function init(){
         if (edgeColor1 == colorO) {
             pushAction("y", [-1, -1, -1]);
         }
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 10; i++) {
             // 上層
             if (futureFaces[10].color == edgeColor1 && futureFaces[7].color == edgeColor2) {
                 pushAction("y", [ 0,  0, +1]);
@@ -1025,7 +1033,7 @@ function init(){
         return normalizeActions(actions);
     }
 
-    function yellowEdgeActions() {
+    function yellowEdgeRotActions() {
         let futureFaces = copyFaces(faces2);
         const actions = [];
         const speed = 1;
@@ -1046,8 +1054,11 @@ function init(){
         if (!isSolved(middleEdgeActions(colorO, colorB))) {
             return null;
         }
-        for (let i = 0; i < 100; i++) {
-            if (futureFaces[1].color == colorY && futureFaces[3].color == colorY && futureFaces[5].color == colorY && futureFaces[7].color == colorY) {
+        for (let i = 0; i < 10; i++) {
+            if (futureFaces[1].color == colorY &&
+                futureFaces[3].color == colorY &&
+                futureFaces[5].color == colorY &&
+                futureFaces[7].color == colorY) {
                 break;
             }
             if (futureFaces[3].color == colorY && futureFaces[5].color == colorY) {
@@ -1104,7 +1115,7 @@ function init(){
         return normalizeActions(actions);
     }
 
-    function yellowCornerActions() {
+    function yellowCornerRotActions() {
         let futureFaces = copyFaces(faces2);
         const actions = [];
         const speed = 1;
@@ -1113,7 +1124,7 @@ function init(){
             actions.push(action);
             rotateFaces(action, futureFaces);
         }
-        if (!isSolved(yellowEdgeActions())) {
+        if (!isSolved(yellowEdgeRotActions())) {
             return null;
         }
         function pushActionSet() {
@@ -1126,8 +1137,11 @@ function init(){
             pushAction("y", [ 0,  0, +1]);
             pushAction("x", [ 0,  0, -1]);
         }
-        for (let i = 0; i < 100; i++) {
-            if (futureFaces[0].color == colorY && futureFaces[2].color == colorY && futureFaces[6].color == colorY && futureFaces[8].color == colorY) {
+        for (let i = 0; i < 10; i++) {
+            if (futureFaces[0].color == colorY &&
+                futureFaces[2].color == colorY &&
+                futureFaces[6].color == colorY &&
+                futureFaces[8].color == colorY) {
                 break;
             }
 
@@ -1205,7 +1219,7 @@ function init(){
             actions.push(action);
             rotateFaces(action, futureFaces);
         }
-        if (!isSolved(yellowCornerActions())) {
+        if (!isSolved(yellowCornerRotActions())) {
             return null;
         }
         function pushActionSet() {
@@ -1221,23 +1235,30 @@ function init(){
             pushAction("y", [ 0,  0, +1]);
             pushAction("x", [-1,  0, +1]);
         }
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 10; i++) {
             if (futureFaces[9].color == futureFaces[11].color &&
                 futureFaces[18].color == futureFaces[20].color &&
                 futureFaces[27].color == futureFaces[29].color &&
                 futureFaces[36].color == futureFaces[38].color) {
+                if (futureFaces[13].color != colorB) {
+                    pushAction("y", [+1, +1, +1]);
+                    continue;
+                }
                 if (futureFaces[9].color == colorB && futureFaces[18].color == colorR) {
                     break;
-                } else if (futureFaces[9].color == colorR && futureFaces[18].color == colorG) {
+                }
+                if (futureFaces[9].color == colorR && futureFaces[18].color == colorG) {
                     pushAction("y", [ 0,  0, -1]);
-                    break;
-                } else if (futureFaces[9].color == colorG && futureFaces[18].color == colorO) {
+                    continue;
+                }
+                if (futureFaces[9].color == colorG && futureFaces[18].color == colorO) {
                     pushAction("y", [ 0,  0, +1]);
                     pushAction("y", [ 0,  0, +1]);
-                    break;
-                } else if (futureFaces[9].color == colorO && futureFaces[18].color == colorB) {
+                    continue;
+                }
+                if (futureFaces[9].color == colorO && futureFaces[18].color == colorB) {
                     pushAction("y", [ 0,  0, +1]);
-                    break;
+                    continue;
                 }
             }
 
@@ -1285,6 +1306,70 @@ function init(){
         return normalizeActions(actions);
     }
 
+    function yellowEdgePosActions() {
+        let futureFaces = copyFaces(faces2);
+        const actions = [];
+        const speed = 1;
+        function pushAction(axis, direction) {
+            const action = {axis, direction, speed};
+            actions.push(action);
+            rotateFaces(action, futureFaces);
+        }
+        if (!isSolved(yellowCornerPosActions())) {
+            return null;
+        }
+        function pushActionSet() {
+            pushAction("x", [ 0, -1,  0]);
+            pushAction("x", [ 0, -1,  0]);
+            pushAction("y", [ 0,  0, +1]);
+            pushAction("x", [ 0, -1,  0]);
+            pushAction("y", [ 0,  0, +1]);
+            pushAction("y", [ 0,  0, +1]);
+            pushAction("x", [ 0, +1,  0]);
+            pushAction("y", [ 0,  0, +1]);
+            pushAction("x", [ 0, -1,  0]);
+            pushAction("x", [ 0, -1,  0]);
+        }
+        for (let i = 0; i < 10; i++) {
+            if (futureFaces[10].color == futureFaces[14].color &&
+                futureFaces[19].color == futureFaces[23].color) {
+                break;
+            }
+
+            if (futureFaces[10].color == futureFaces[14].color) {
+                pushAction("y", [+1, +1, +1]);
+                pushAction("y", [+1, +1, +1]);
+                pushActionSet();
+                continue;
+            }
+
+            if (futureFaces[19].color == futureFaces[23].color) {
+                pushAction("y", [-1, -1, -1]);
+                pushActionSet();
+                continue;
+            }
+
+            if (futureFaces[28].color == futureFaces[32].color) {
+                pushActionSet();
+                continue;
+            }
+
+            if (futureFaces[37].color == futureFaces[41].color) {
+                pushAction("y", [+1, +1, +1]);
+                pushActionSet();
+                continue;
+            }
+
+            if (true) {
+                pushActionSet();
+                continue;
+            }
+
+            return null;
+        }
+        return normalizeActions(actions);
+    }
+
     setActionBtnClickEvent("action-yellow-to-top", "", function() {
         return yellowToTopActions();
     });
@@ -1319,16 +1404,20 @@ function init(){
     middleEdgeHandler("action-green-orange", colorG, colorO);
     middleEdgeHandler("action-orange-blue",  colorO, colorB);
 
-    setActionBtnClickEvent("action-yellow-edge", "", function() {
-        return yellowEdgeActions();
+    setActionBtnClickEvent("action-yellow-edge-rot", "", function() {
+        return yellowEdgeRotActions();
     });
 
-    setActionBtnClickEvent("action-yellow-corner", "", function() {
-        return yellowCornerActions();
+    setActionBtnClickEvent("action-yellow-corner-rot", "", function() {
+        return yellowCornerRotActions();
     });
 
     setActionBtnClickEvent("action-yellow-corner-pos", "", function() {
         return yellowCornerPosActions();
+    });
+
+    setActionBtnClickEvent("action-yellow-edge-pos", "", function() {
+        return yellowEdgePosActions();
     });
 
     //--------------------------------------------------------------------------------
@@ -1390,9 +1479,10 @@ function init(){
     <a href="#" id="action-orange-blue" class="btn">橙青</a>
   </div>
   <div>
-    <a href="#" id="action-yellow-edge" class="btn">黄エッジ</a>
-    <a href="#" id="action-yellow-corner" class="btn">黄コーナー方向</a>
+    <a href="#" id="action-yellow-edge-rot" class="btn">黄エッジ方向</a>
+    <a href="#" id="action-yellow-corner-rot" class="btn">黄コーナー方向</a>
     <a href="#" id="action-yellow-corner-pos" class="btn">黄コーナー位置</a>
+    <a href="#" id="action-yellow-edge-pos" class="btn">黄エッジ位置</a>
   </div>
   <div>
     <a href="#" id="action-shuffle" class="btn">シャッフル</a>
