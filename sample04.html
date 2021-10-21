@@ -465,6 +465,10 @@ function init(){
     setActionBtnClickEvent("action-f1", "f", [{axis: "z", direction: [ 0,  0, +1], speed: 1}]);
     setActionBtnClickEvent("action-f3", "F", [{axis: "z", direction: [ 0,  0, -1], speed: 1}]);
 
+    setActionBtnClickEvent("action-d1", "d", [{axis: "y", direction: [-1,  0,  0], speed: 1}]);
+    setActionBtnClickEvent("action-d3", "D", [{axis: "y", direction: [+1,  0,  0], speed: 1}]);
+    setActionBtnClickEvent("action-b1", "b", [{axis: "z", direction: [-1,  0,  0], speed: 1}]);
+    setActionBtnClickEvent("action-b3", "B", [{axis: "z", direction: [+1,  0,  0], speed: 1}]);
     setActionBtnClickEvent("action-m1", "m", [{axis: "x", direction: [ 0, -1,  0], speed: 1}]);
     setActionBtnClickEvent("action-m3", "M", [{axis: "x", direction: [ 0, +1,  0], speed: 1}]);
 
@@ -569,6 +573,10 @@ function init(){
     <a href="#" id="action-f3" class="btn">F'</a>
   </div>
   <div>
+    <a href="#" id="action-d1" class="btn">D</a>
+    <a href="#" id="action-d3" class="btn">D'</a>
+    <a href="#" id="action-b1" class="btn">B</a>
+    <a href="#" id="action-b3" class="btn">B'</a>
     <a href="#" id="action-m1" class="btn">M</a>
     <a href="#" id="action-m3" class="btn">M'</a>
   </div>
