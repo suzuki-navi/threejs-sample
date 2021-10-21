@@ -554,42 +554,43 @@ function init(){
         let futureFaces = copyFaces(faces2);
         const actions = [];
         const speed = 1;
-        function pushAction(action) {
+        function pushAction(axis, direction) {
+            const action = {axis, direction, speed};
             actions.push(action);
             rotateFaces(action, futureFaces);
         }
         for (let i = 0; i < 100; i++) {
             if (futureFaces[13].color == colorY) {
-                pushAction({axis: "x", direction: [+1, +1, +1], speed});
+                pushAction("x", [+1, +1, +1]);
                 continue;
             }
             if (futureFaces[22].color == colorY) {
-                pushAction({axis: "z", direction: [-1, -1, -1], speed});
+                pushAction("z", [-1, -1, -1]);
                 continue;
             }
             if (futureFaces[31].color == colorY) {
-                pushAction({axis: "x", direction: [-1, -1, -1], speed});
+                pushAction("x", [-1, -1, -1]);
                 continue;
             }
             if (futureFaces[40].color == colorY) {
-                pushAction({axis: "z", direction: [+1, +1, +1], speed});
+                pushAction("z", [+1, +1, +1]);
                 continue;
             }
             if (futureFaces[49].color == colorY) {
-                pushAction({axis: "x", direction: [+1, +1, +1], speed});
+                pushAction("x", [+1, +1, +1]);
                 continue;
             }
 
             if (futureFaces[22].color == colorB) {
-                pushAction({axis: "y", direction: [+1, +1, +1], speed});
+                pushAction("y", [+1, +1, +1]);
                 continue;
             }
             if (futureFaces[31].color == colorB) {
-                pushAction({axis: "y", direction: [+1, +1, +1], speed});
+                pushAction("y", [+1, +1, +1]);
                 continue;
             }
             if (futureFaces[40].color == colorB) {
-                pushAction({axis: "y", direction: [-1, -1, -1], speed});
+                pushAction("y", [-1, -1, -1]);
                 continue;
             }
 
@@ -606,164 +607,164 @@ function init(){
         let futureFaces = copyFaces(faces2);
         const actions = [];
         const speed = 1;
-        function pushAction(action) {
+        function pushAction(axis, direction) {
+            const action = {axis, direction, speed};
             actions.push(action);
             rotateFaces(action, futureFaces);
         }
-        const pre = yellowToTopActions();
+        if (yellowToTopActions().length > 0) {
+            return [];
+        }
         if (edgeColor == colorR) {
-            pre.push({axis: "y", direction: [+1, +1, +1], speed});
+            pushAction("y", [+1, +1, +1]);
         }
         if (edgeColor == colorG) {
-            pre.push({axis: "y", direction: [+1, +1, +1], speed});
-            pre.push({axis: "y", direction: [+1, +1, +1], speed});
+            pushAction("y", [+1, +1, +1]);
+            pushAction("y", [+1, +1, +1]);
         }
         if (edgeColor == colorO) {
-            pre.push({axis: "y", direction: [-1, -1, -1], speed});
-        }
-        for (const act of pre) {
-            pushAction(act);
+            pushAction("y", [-1, -1, -1]);
         }
         for (let i = 0; i < 100; i++) {
             // 上層に白が上向き
             // 前
             if (futureFaces[7].color == colorW && futureFaces[10].color == edgeColor) {
-                pushAction({axis: "z", direction: [ 0,  0, +1], speed});
+                pushAction("z", [ 0,  0, +1]);
                 continue;
             }
             // 右
             if (futureFaces[5].color == colorW && futureFaces[19].color == edgeColor) {
-                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                pushAction("y", [ 0,  0, +1]);
                 continue;
             }
             // 后
             if (futureFaces[1].color == colorW && futureFaces[28].color == edgeColor) {
-                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                pushAction("y", [ 0,  0, +1]);
                 continue;
             }
             // 左
             if (futureFaces[3].color == colorW && futureFaces[37].color == edgeColor) {
-                pushAction({axis: "y", direction: [ 0,  0, -1], speed});
+                pushAction("y", [ 0,  0, -1]);
                 continue;
             }
 
             // 上層に白が側面
             // 前
             if (futureFaces[10].color == colorW && futureFaces[7].color == edgeColor) {
-                pushAction({axis: "z", direction: [ 0,  0, +1], speed});
+                pushAction("z", [ 0,  0, +1]);
                 continue;
             }
             // 右
             if (futureFaces[19].color == colorW && futureFaces[5].color == edgeColor) {
-                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                pushAction("y", [ 0,  0, +1]);
                 continue;
             }
             // 后
             if (futureFaces[28].color == colorW && futureFaces[1].color == edgeColor) {
-                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
-                pushAction({axis: "y", direction: [ 0,  0, +1], speed});
+                pushAction("y", [ 0,  0, +1]);
+                pushAction("y", [ 0,  0, +1]);
                 continue;
             }
             // 左
             if (futureFaces[37].color == colorW && futureFaces[3].color == edgeColor) {
-                pushAction({axis: "y", direction: [ 0,  0, -1], speed});
+                pushAction("y", [ 0,  0, -1]);
                 continue;
             }
 
             // 中間層
             // 白が右で、対象が前
             if (futureFaces[21].color == colorW && futureFaces[14].color == edgeColor) {
-                pushAction({axis: "z", direction: [ 0,  0, +1], speed});
+                pushAction("z", [ 0,  0, +1]);
                 continue;
             }
             // 白が后で、対象が右
             if (futureFaces[30].color == colorW && futureFaces[23].color == edgeColor) {
-                pushAction({axis: "y", direction: [-1,  0,  0], speed});
-                pushAction({axis: "x", direction: [ 0,  0, +1], speed});
-                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                pushAction("y", [-1,  0,  0]);
+                pushAction("x", [ 0,  0, +1]);
+                pushAction("y", [+1,  0,  0]);
                 continue;
             }
             // 白が左で、対象が后
             if (futureFaces[39].color == colorW && futureFaces[32].color == edgeColor) {
-                pushAction({axis: "y", direction: [-1,  0,  0], speed});
-                pushAction({axis: "y", direction: [-1,  0,  0], speed});
-                pushAction({axis: "z", direction: [-1,  0,  0], speed});
-                pushAction({axis: "y", direction: [+1,  0,  0], speed});
-                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                pushAction("y", [-1,  0,  0]);
+                pushAction("y", [-1,  0,  0]);
+                pushAction("z", [-1,  0,  0]);
+                pushAction("y", [+1,  0,  0]);
+                pushAction("y", [+1,  0,  0]);
                 continue;
             }
             // 白が前で、対象が左
             if (futureFaces[12].color == colorW && futureFaces[41].color == edgeColor) {
-                pushAction({axis: "y", direction: [+1,  0,  0], speed});
-                pushAction({axis: "x", direction: [-1,  0,  0], speed});
-                pushAction({axis: "y", direction: [-1,  0,  0], speed});
+                pushAction("y", [+1,  0,  0]);
+                pushAction("x", [-1,  0,  0]);
+                pushAction("y", [-1,  0,  0]);
                 continue;
             }
             // 白が前で、対象が右
             if (futureFaces[14].color == colorW && futureFaces[21].color == edgeColor) {
-                pushAction({axis: "y", direction: [-1,  0,  0], speed});
-                pushAction({axis: "x", direction: [ 0,  0, -1], speed});
-                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                pushAction("y", [-1,  0,  0]);
+                pushAction("x", [ 0,  0, -1]);
+                pushAction("y", [+1,  0,  0]);
                 continue;
             }
             // 白が右で、対象が后
             if (futureFaces[23].color == colorW && futureFaces[30].color == edgeColor) {
-                pushAction({axis: "y", direction: [-1,  0,  0], speed});
-                pushAction({axis: "y", direction: [-1,  0,  0], speed});
-                pushAction({axis: "z", direction: [+1,  0,  0], speed});
-                pushAction({axis: "y", direction: [+1,  0,  0], speed});
-                pushAction({axis: "y", direction: [+1,  0,  0], speed});
+                pushAction("y", [-1,  0,  0]);
+                pushAction("y", [-1,  0,  0]);
+                pushAction("z", [+1,  0,  0]);
+                pushAction("y", [+1,  0,  0]);
+                pushAction("y", [+1,  0,  0]);
                 continue;
             }
             // 白が后で、対象が左
             if (futureFaces[32].color == colorW && futureFaces[39].color == edgeColor) {
-                pushAction({axis: "y", direction: [+1,  0,  0], speed});
-                pushAction({axis: "x", direction: [+1,  0,  0], speed});
-                pushAction({axis: "y", direction: [-1,  0,  0], speed});
+                pushAction("y", [+1,  0,  0]);
+                pushAction("x", [+1,  0,  0]);
+                pushAction("y", [-1,  0,  0]);
                 continue;
             }
             // 白が左で、対象が前
             if (futureFaces[41].color == colorW && futureFaces[12].color == edgeColor) {
-                pushAction({axis: "z", direction: [ 0,  0, -1], speed});
+                pushAction("z", [ 0,  0, -1]);
                 continue;
             }
 
             // 下層に白が下向き
             // 右
             if (futureFaces[50].color == colorW && futureFaces[25].color == edgeColor) {
-                pushAction({axis: "x", direction: [ 0,  0, -1], speed});
+                pushAction("x", [ 0,  0, -1]);
                 continue;
             }
             // 后
             if (futureFaces[52].color == colorW && futureFaces[34].color == edgeColor) {
-                pushAction({axis: "z", direction: [+1,  0,  0], speed});
+                pushAction("z", [+1,  0,  0]);
                 continue;
             }
             // 左
             if (futureFaces[48].color == colorW && futureFaces[43].color == edgeColor) {
-                pushAction({axis: "x", direction: [+1,  0,  0], speed});
+                pushAction("x", [+1,  0,  0]);
                 continue;
             }
 
             // 下層に白が側面
             // 前
             if (futureFaces[16].color == colorW && futureFaces[46].color == edgeColor) {
-                pushAction({axis: "z", direction: [ 0,  0, -1], speed});
+                pushAction("z", [ 0,  0, -1]);
                 continue;
             }
             // 右
             if (futureFaces[25].color == colorW && futureFaces[50].color == edgeColor) {
-                pushAction({axis: "x", direction: [ 0,  0, -1], speed});
+                pushAction("x", [ 0,  0, -1]);
                 continue;
             }
             // 后
             if (futureFaces[34].color == colorW && futureFaces[52].color == edgeColor) {
-                pushAction({axis: "z", direction: [+1,  0,  0], speed});
+                pushAction("z", [+1,  0,  0]);
                 continue;
             }
             // 左
             if (futureFaces[43].color == colorW && futureFaces[48].color == edgeColor) {
-                pushAction({axis: "x", direction: [+1,  0,  0], speed});
+                pushAction("x", [+1,  0,  0]);
                 continue;
             }
 
