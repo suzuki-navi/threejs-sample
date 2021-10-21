@@ -355,8 +355,9 @@ function init(){
         renderer.render(scene, camera);
     }
 
-    function setActionBtnClickEvent(id, actions) {
-        document.getElementById(id).addEventListener("click", function(event) {
+    const keyEventHandlers = {};
+    function setActionBtnClickEvent(id, key, actions) {
+        const handler = function(event) {
             let acts;
             if (typeof(actions) == "function") {
                 acts = actions();
@@ -366,30 +367,36 @@ function init(){
             for (const act of acts) {
                 actionQueue.push(act);
             }
-            event.preventDefault();
+            if (event) {
+                event.preventDefault();
+            }
             return false;
-        });
+        };
+        document.getElementById(id).addEventListener("click", handler);
+        if (key != "") {
+            keyEventHandlers[key] = handler;
+        }
     }
-    setActionBtnClickEvent("action-r1", [{axis: "x", direction: [ 0,  0, +1], speed: 1}]);
-    setActionBtnClickEvent("action-r3", [{axis: "x", direction: [ 0,  0, -1], speed: 1}]);
-    setActionBtnClickEvent("action-l1", [{axis: "x", direction: [-1,  0,  0], speed: 1}]);
-    setActionBtnClickEvent("action-l3", [{axis: "x", direction: [+1,  0,  0], speed: 1}]);
-    setActionBtnClickEvent("action-u1", [{axis: "y", direction: [ 0,  0, +1], speed: 1}]);
-    setActionBtnClickEvent("action-u3", [{axis: "y", direction: [ 0,  0, -1], speed: 1}]);
-    setActionBtnClickEvent("action-f1", [{axis: "z", direction: [ 0,  0, +1], speed: 1}]);
-    setActionBtnClickEvent("action-f3", [{axis: "z", direction: [ 0,  0, -1], speed: 1}]);
+    setActionBtnClickEvent("action-r1", "r", [{axis: "x", direction: [ 0,  0, +1], speed: 1}]);
+    setActionBtnClickEvent("action-r3", "R", [{axis: "x", direction: [ 0,  0, -1], speed: 1}]);
+    setActionBtnClickEvent("action-l1", "l", [{axis: "x", direction: [-1,  0,  0], speed: 1}]);
+    setActionBtnClickEvent("action-l3", "L", [{axis: "x", direction: [+1,  0,  0], speed: 1}]);
+    setActionBtnClickEvent("action-u1", "u", [{axis: "y", direction: [ 0,  0, +1], speed: 1}]);
+    setActionBtnClickEvent("action-u3", "U", [{axis: "y", direction: [ 0,  0, -1], speed: 1}]);
+    setActionBtnClickEvent("action-f1", "f", [{axis: "z", direction: [ 0,  0, +1], speed: 1}]);
+    setActionBtnClickEvent("action-f3", "F", [{axis: "z", direction: [ 0,  0, -1], speed: 1}]);
 
-    setActionBtnClickEvent("action-m1", [{axis: "x", direction: [ 0, -1,  0], speed: 1}]);
-    setActionBtnClickEvent("action-m3", [{axis: "x", direction: [ 0, +1,  0], speed: 1}]);
+    setActionBtnClickEvent("action-m1", "m", [{axis: "x", direction: [ 0, -1,  0], speed: 1}]);
+    setActionBtnClickEvent("action-m3", "M", [{axis: "x", direction: [ 0, +1,  0], speed: 1}]);
 
-    setActionBtnClickEvent("action-x1", [{axis: "x", direction: [+1, +1, +1], speed: 1}]);
-    setActionBtnClickEvent("action-x3", [{axis: "x", direction: [-1, -1, -1], speed: 1}]);
-    setActionBtnClickEvent("action-y1", [{axis: "y", direction: [+1, +1, +1], speed: 1}]);
-    setActionBtnClickEvent("action-y3", [{axis: "y", direction: [-1, -1, -1], speed: 1}]);
-    setActionBtnClickEvent("action-z1", [{axis: "z", direction: [+1, +1, +1], speed: 1}]);
-    setActionBtnClickEvent("action-z3", [{axis: "z", direction: [-1, -1, -1], speed: 1}]);
+    setActionBtnClickEvent("action-x1", "x", [{axis: "x", direction: [+1, +1, +1], speed: 1}]);
+    setActionBtnClickEvent("action-x3", "X", [{axis: "x", direction: [-1, -1, -1], speed: 1}]);
+    setActionBtnClickEvent("action-y1", "y", [{axis: "y", direction: [+1, +1, +1], speed: 1}]);
+    setActionBtnClickEvent("action-y3", "Y", [{axis: "y", direction: [-1, -1, -1], speed: 1}]);
+    setActionBtnClickEvent("action-z1", "z", [{axis: "z", direction: [+1, +1, +1], speed: 1}]);
+    setActionBtnClickEvent("action-z3", "Z", [{axis: "z", direction: [-1, -1, -1], speed: 1}]);
 
-    setActionBtnClickEvent("action-shuffle", function() {
+    setActionBtnClickEvent("action-shuffle", "", function() {
         const actions = [];
         const speed = 4;
         for (let i = 0; i < 20; i++) {
@@ -415,6 +422,13 @@ function init(){
         resetCamera();
         event.preventDefault();
         return false;
+    });
+
+    document.body.addEventListener("keydown", function(event) {
+        const handler = keyEventHandlers[event.key];
+        if (handler) {
+            handler();
+        }
     });
 
     animate();
