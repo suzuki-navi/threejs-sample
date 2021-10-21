@@ -491,7 +491,7 @@ function init(){
         return actions;
     });
 
-    setActionBtnClickEvent("action-white-to-top", "", function() {
+    setActionBtnClickEvent("action-yello-to-top", "", function() {
         let futureFaces = copyFaces(faces2);
         const actions = [];
         const speed = 1;
@@ -500,36 +500,36 @@ function init(){
             rotateFaces(action, futureFaces);
         }
         while (true) {
-            if (futureFaces[13].color == colorW) {
+            if (futureFaces[13].color == colorY) {
                 pushAction({axis: "x", direction: [+1, +1, +1], speed});
                 continue;
             }
-            if (futureFaces[22].color == colorW) {
+            if (futureFaces[22].color == colorY) {
                 pushAction({axis: "z", direction: [-1, -1, -1], speed});
                 continue;
             }
-            if (futureFaces[31].color == colorW) {
+            if (futureFaces[31].color == colorY) {
                 pushAction({axis: "x", direction: [-1, -1, -1], speed});
                 continue;
             }
-            if (futureFaces[40].color == colorW) {
+            if (futureFaces[40].color == colorY) {
                 pushAction({axis: "z", direction: [+1, +1, +1], speed});
                 continue;
             }
-            if (futureFaces[49].color == colorW) {
+            if (futureFaces[49].color == colorY) {
                 pushAction({axis: "x", direction: [+1, +1, +1], speed});
                 continue;
             }
 
-            if (futureFaces[22].color == colorG) {
+            if (futureFaces[22].color == colorB) {
                 pushAction({axis: "y", direction: [+1, +1, +1], speed});
                 continue;
             }
-            if (futureFaces[31].color == colorG) {
+            if (futureFaces[31].color == colorB) {
                 pushAction({axis: "y", direction: [+1, +1, +1], speed});
                 continue;
             }
-            if (futureFaces[40].color == colorG) {
+            if (futureFaces[40].color == colorB) {
                 pushAction({axis: "y", direction: [-1, -1, -1], speed});
                 continue;
             }
@@ -578,7 +578,7 @@ function init(){
     <a href="#" id="action-shuffle" class="btn">シャッフル</a>
   </div>
   <div>
-    <a href="#" id="action-white-to-top" class="btn">白を上に</a>
+    <a href="#" id="action-yello-to-top" class="btn">黄を上に</a>
   </div>
 
   <p>
